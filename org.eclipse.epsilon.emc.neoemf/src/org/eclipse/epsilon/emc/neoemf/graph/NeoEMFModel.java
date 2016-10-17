@@ -128,7 +128,8 @@ public class NeoEMFModel extends AbstractEmfModel {
 			// set graph-specific options
 			if(autocommit) {
 				storeOptions.add(BlueprintsResourceOptions.EStoreGraphOption.AUTOCOMMIT);
-				options.put(BlueprintsResourceOptions.OPTIONS_BLUEPRINTS_AUTOCOMMIT_CHUNK, autocommitChunk);
+				storeOptions.add(BlueprintsResourceOptions.EStoreGraphOption.DIRECT_WRITE);
+				options.put(BlueprintsResourceOptions.OPTIONS_BLUEPRINTS_AUTOCOMMIT_CHUNK, String.valueOf(autocommitChunk));
 			}
 			else {
 				storeOptions.add(BlueprintsResourceOptions.EStoreGraphOption.DIRECT_WRITE);
@@ -156,6 +157,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 			// set map-specific options
 			if(autocommit) {
 				storeOptions.add(MapResourceOptions.EStoreMapOption.AUTOCOMMIT);
+				storeOptions.add(MapResourceOptions.EStoreMapOption.DIRECT_WRITE);
 				// Autocommit chunk size not supported in Map for now
 			} 
 			else {
