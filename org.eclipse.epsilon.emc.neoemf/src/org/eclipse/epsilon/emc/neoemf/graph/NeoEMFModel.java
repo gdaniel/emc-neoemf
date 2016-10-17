@@ -163,7 +163,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 			}
 		}
 		try {
-			this.modelImpl.load(Collections.emptyMap());
+			this.modelImpl.load(options);
 		} catch(IOException e) {
 			throw new EolModelLoadingException(e, this);
 		}
