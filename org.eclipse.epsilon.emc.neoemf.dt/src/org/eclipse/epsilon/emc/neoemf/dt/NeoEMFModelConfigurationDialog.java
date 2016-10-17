@@ -201,6 +201,7 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		autocommitCheck.setSelection(properties.hasProperty(NeoEMFModel.PROPERTY_AUTOCOMMIT));
 		if(properties.hasProperty(NeoEMFModel.PROPERTY_AUTOCOMMIT_CHUNK)) {
 			autocommitChunkText.setText((String) properties.getProperty(NeoEMFModel.PROPERTY_AUTOCOMMIT_CHUNK));
+			autocommitChunkText.setEnabled(true);
 		}
 		cacheSizeCheck.setSelection(properties.hasProperty(NeoEMFModel.PROPERTY_CACHE_SIZE));
 		cacheIsSetCheck.setSelection(properties.hasProperty(NeoEMFModel.PROPERTY_CACHE_ISSET));
