@@ -5,10 +5,10 @@
          point="org.eclipse.epsilon.common.dt.modelType">
       <modelType
             class="org.eclipse.epsilon.emc.neoemf.graph.NeoEMFModel"
-            dialog="org.eclipse.epsilon.emc.neoemf.graph.dt.NeoEMFModelConfigurationDialog"
-            icon="icons/ecorefile.gif"
-            label="NeoEMF/Graph Model"
-            type="neoemf-graph">
+            dialog="org.eclipse.epsilon.emc.neoemf.dt.NeoEMFModelConfigurationDialog"
+            icon="icons/neoemf.png"
+            label="NeoEMF Model"
+            type="neoemf">
       </modelType>
    </extension>
 
