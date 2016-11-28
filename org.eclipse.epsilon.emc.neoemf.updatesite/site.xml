@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.eclipse.epsilon.emc.neoemf.dt.feature_1.0.0.201610171803.jar" id="org.eclipse.epsilon.emc.neoemf.dt.feature" version="1.0.0.201610171803">
+   <feature url="features/org.eclipse.epsilon.emc.neoemf.dt.feature_1.0.0.201611280150.jar" id="org.eclipse.epsilon.emc.neoemf.dt.feature" version="1.0.0.201611280150">
       <category name="org.eclipse.epsilon.emc.neoemf"/>
    </feature>
-   <feature url="features/org.eclipse.epsilon.emc.neoemf.feature_1.0.0.201610171803.jar" id="org.eclipse.epsilon.emc.neoemf.feature" version="1.0.0.201610171803">
+   <feature url="features/org.eclipse.epsilon.emc.neoemf.feature_1.0.0.201611280150.jar" id="org.eclipse.epsilon.emc.neoemf.feature" version="1.0.0.201611280150">
       <category name="org.eclipse.epsilon.emc.neoemf"/>
    </feature>
    <category-def name="org.eclipse.epsilon.emc.neoemf" label="NeoEMF Driver"/>

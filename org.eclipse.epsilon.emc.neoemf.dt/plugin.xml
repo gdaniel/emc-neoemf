@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.epsilon.common.dt.modelType">
       <modelType
-            class="org.eclipse.epsilon.emc.neoemf.graph.NeoEMFModel"
+            class="org.eclipse.epsilon.emc.neoemf.NeoEMFModel"
             dialog="org.eclipse.epsilon.emc.neoemf.dt.NeoEMFModelConfigurationDialog"
             icon="icons/neoemf.png"
             label="NeoEMF Model"

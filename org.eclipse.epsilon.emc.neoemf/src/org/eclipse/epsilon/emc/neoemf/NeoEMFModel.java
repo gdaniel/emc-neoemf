@@ -1,4 +1,4 @@
-package org.eclipse.epsilon.emc.neoemf.graph;
+package org.eclipse.epsilon.emc.neoemf;
 
 import java.io.File;
 import java.io.IOException;

@@ -3,8 +3,8 @@ package org.eclipse.epsilon.emc.neoemf.dt;
 import java.util.Arrays;
 
 import org.eclipse.epsilon.common.dt.launching.dialogs.AbstractModelConfigurationDialog;
+import org.eclipse.epsilon.emc.neoemf.NeoEMFModel;
 import org.eclipse.epsilon.emc.neoemf.dt.dialogs.BrowseNeoEMFWorkspaceUtil;
-import org.eclipse.epsilon.emc.neoemf.graph.NeoEMFModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
