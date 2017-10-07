@@ -2,12 +2,8 @@ package org.eclipse.epsilon.emc.neoemf;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -22,17 +18,17 @@ import org.eclipse.epsilon.eol.models.IRelativePathResolver;
 
 import fr.inria.atlanmod.neoemf.datastore.PersistenceBackendFactoryRegistry;
 import fr.inria.atlanmod.neoemf.graph.blueprints.datastore.BlueprintsPersistenceBackendFactory;
-import fr.inria.atlanmod.neoemf.graph.blueprints.neo4j.resources.BlueprintsNeo4jResourceOptions;
-import fr.inria.atlanmod.neoemf.graph.blueprints.resources.BlueprintsResourceOptions;
-import fr.inria.atlanmod.neoemf.graph.blueprints.util.NeoBlueprintsURI;
+import fr.inria.atlanmod.neoemf.graph.blueprints.neo4j.option.BlueprintsNeo4jOptionsBuilder;
+import fr.inria.atlanmod.neoemf.graph.blueprints.neo4j.option.BlueprintsNeo4jResourceOptions;
+import fr.inria.atlanmod.neoemf.graph.blueprints.neo4j.option.BlueprintsNeo4jResourceOptions.CacheType;
+import fr.inria.atlanmod.neoemf.graph.blueprints.option.BlueprintsResourceOptions;
+import fr.inria.atlanmod.neoemf.graph.blueprints.util.BlueprintsURI;
 import fr.inria.atlanmod.neoemf.map.datastore.MapPersistenceBackendFactory;
-import fr.inria.atlanmod.neoemf.map.resources.MapResourceOptions;
-import fr.inria.atlanmod.neoemf.map.util.NeoMapURI;
-import fr.inria.atlanmod.neoemf.resources.PersistentResource;
-import fr.inria.atlanmod.neoemf.resources.PersistentResourceFactory;
-import fr.inria.atlanmod.neoemf.resources.PersistentResourceOptions;
-import fr.inria.atlanmod.neoemf.resources.PersistentResourceOptions.StoreOption;
-import fr.inria.atlanmod.neoemf.resources.impl.PersistentResourceImpl;
+import fr.inria.atlanmod.neoemf.map.option.MapOptionsBuilder;
+import fr.inria.atlanmod.neoemf.option.AbstractPersistenceOptionsBuilder;
+import fr.inria.atlanmod.neoemf.option.PersistenceOptionsBuilder;
+import fr.inria.atlanmod.neoemf.resource.PersistentResource;
+import fr.inria.atlanmod.neoemf.resource.PersistentResourceFactory;
 
 public class NeoEMFModel extends AbstractEmfModel {
 
@@ -106,34 +102,50 @@ public class NeoEMFModel extends AbstractEmfModel {
 		// TODO see if we can use a CachedResourceSet
 		rSet = new ResourceSetImpl();
 		
-		Map<String,Object> options = new HashMap<String, Object>();
-		List<StoreOption> storeOptions = new ArrayList<StoreOption>();
-		options.put(PersistentResourceOptions.STORE_OPTIONS, storeOptions);
+		AbstractPersistenceOptionsBuilder builder = null;
+		if(resourceType.equals("Graph")) {
+			builder = BlueprintsNeo4jOptionsBuilder.newBuilder();
+		}
+		else if(resourceType.equals("Map")) {
+			builder = MapOptionsBuilder.newBuilder();
+		}
+		
+//		Map<String,Object> options = new HashMap<String, Object>();
+//		List<StoreOption> storeOptions = new ArrayList<StoreOption>();
+//		options.put(PersistentResourceOptions.STORE_OPTIONS, storeOptions);
 		// set core-level options
 		if(cacheSize)
-			storeOptions.add(PersistentResourceOptions.EStoreOption.SIZE_CACHING);
+			builder.cacheSizes();
 		if(cacheIsSet)
-			storeOptions.add(PersistentResourceOptions.EStoreOption.IS_SET_CACHING);
+			builder.cacheIsSet();
 		if(cacheEStructuralFeatures)
-			storeOptions.add(PersistentResourceOptions.EStoreOption.ESTRUCUTRALFEATURE_CACHING);
+			builder.cacheFeatures();
 		if(logging)
-			storeOptions.add(PersistentResourceOptions.EStoreOption.LOGGING);
+			builder.log();
 		if(resourceType.equals("Graph")) {
-			if(!PersistenceBackendFactoryRegistry.isRegistered(NeoBlueprintsURI.NEO_GRAPH_SCHEME)) {
-				PersistenceBackendFactoryRegistry.register(NeoBlueprintsURI.NEO_GRAPH_SCHEME, BlueprintsPersistenceBackendFactory.getInstance());
+			BlueprintsNeo4jOptionsBuilder neoBuilder = (BlueprintsNeo4jOptionsBuilder)builder;
+			if(!PersistenceBackendFactoryRegistry.isRegistered(BlueprintsURI.SCHEME)) {
+				PersistenceBackendFactoryRegistry.register(BlueprintsURI.SCHEME, BlueprintsPersistenceBackendFactory.getInstance());
 			}
-			rSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put(NeoBlueprintsURI.NEO_GRAPH_SCHEME, PersistentResourceFactory.eINSTANCE);
-			this.modelImpl = rSet.createResource(NeoBlueprintsURI.createNeoGraphURI(new File(neoemfPath)));
+			rSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put(BlueprintsURI.SCHEME, PersistentResourceFactory.getInstance());
+			this.modelImpl = rSet.createResource(BlueprintsURI.createFileURI(new File(neoemfPath)));
 			
 			// set graph-specific options
 			if(autocommit) {
-				storeOptions.add(BlueprintsResourceOptions.EStoreGraphOption.AUTOCOMMIT);
-				storeOptions.add(BlueprintsResourceOptions.EStoreGraphOption.DIRECT_WRITE);
-				options.put(BlueprintsResourceOptions.OPTIONS_BLUEPRINTS_AUTOCOMMIT_CHUNK, String.valueOf(autocommitChunk));
+				if(autocommitChunk > 0) {
+					neoBuilder.autocommit(autocommitChunk);
+				}
+				else {
+					neoBuilder.autocommit();
+				}
 			}
 			else {
-				storeOptions.add(BlueprintsResourceOptions.EStoreGraphOption.DIRECT_WRITE);
+				neoBuilder.directWrite();
 			}
+			switch(cacheType) {
+			case BlueprintsNeo4jResourceOptions.CacheType.SOFT.toString(): neoBuilder.softCache();
+			}
+			BlueprintsNeo4jResourceOptions.CacheType.SOFT.toString()
 			options.put(BlueprintsNeo4jResourceOptions.OPTIONS_BLUEPRINTS_NEO4J_CACHE_TYPE, cacheType);
 			if(nodeCache > 0)
 				options.put(BlueprintsNeo4jResourceOptions.OPTIONS_BLUEPRINTS_NEO4J_NODES_MAPPED_MEMORY, nodeCache + "M");
