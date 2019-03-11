@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: emc-neoemf
+Bundle-SymbolicName: emc-neoemf
+Bundle-Version: 1.0.0.qualifier
+Export-Package: .
+Require-Bundle: fr.inria.atlanmod.neoemf.core;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.blueprints.core;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.blueprints.neo4j;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.blueprints.neo4j.wrapper;bundle-version="1.0.3",
+ org.eclipse.emf.ecore.xmi;bundle-version="2.15.0",
+ org.eclipse.gmt.modisco.java;bundle-version="0.1.0"

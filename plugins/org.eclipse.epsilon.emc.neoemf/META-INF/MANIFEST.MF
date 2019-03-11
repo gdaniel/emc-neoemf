@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Epsilon Model Connectivity NeoEMF driver
+Bundle-SymbolicName: org.eclipse.epsilon.emc.neoemf
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.eclipse.epsilon.emc.emf;bundle-version="1.5.1",
+ org.eclipse.epsilon.eol.engine;bundle-version="1.5.1",
+ fr.inria.atlanmod.neoemf.core;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.blueprints.core;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.blueprints.neo4j;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.blueprints.neo4j.wrapper;bundle-version="1.0.3",
+ fr.inria.atlanmod.neoemf.data.mapdb;bundle-version="1.0.3"
+Export-Package: org.eclipse.epsilon.emc.neoemf
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: Gwendal DANIEL
