@@ -40,12 +40,6 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 	private Button mapRadio;
 	
 	private Combo cacheTypeCombo;
-	private Button useMemoryMapCheck;
-	private Text nodeMemText;
-	private Text relMemText;
-	private Text propMemText;
-	private Text stringMemText;
-	private Text arrayMemText;
 	
 	private Composite parent;
 	private Composite storeOptionContent;
@@ -141,42 +135,6 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		cacheTypeCombo.setItems(cacheTypeList);
 		cacheTypeCombo.select(2);
 		cacheTypeCombo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		useMemoryMapCheck = new Button(graphOptionContent, SWT.CHECK);
-		useMemoryMapCheck.setText("Use Memory-Mapped Buffers");
-		GridData gd = new GridData();
-		gd.horizontalSpan = 2;
-		useMemoryMapCheck.setLayoutData(gd);
-		
-		final Label nodeMem = new Label(graphOptionContent, SWT.NONE);
-		nodeMem.setText("Node Cache (MB)");
-		nodeMemText = new Text(graphOptionContent, SWT.BORDER);
-		nodeMemText.setText("64");
-		nodeMemText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		final Label relMem = new Label(graphOptionContent, SWT.NONE);
-		relMem.setText("Relationship Cache (MB)");
-		relMemText = new Text(graphOptionContent, SWT.BORDER);
-		relMemText.setText("64");
-		relMemText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		final Label propMem = new Label(graphOptionContent, SWT.NONE);
-		propMem.setText("Property Cache (MB)");
-		propMemText = new Text(graphOptionContent, SWT.BORDER);
-		propMemText.setText("64");
-		propMemText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		final Label stringMem = new Label(graphOptionContent, SWT.NONE);
-		stringMem.setText("String Cache (MB)");
-		stringMemText = new Text(graphOptionContent, SWT.BORDER);
-		stringMemText.setText("64");
-		stringMemText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		final Label arrayMem = new Label(graphOptionContent, SWT.NONE);
-		arrayMem.setText("Array Cache (MB)");
-		arrayMemText = new Text(graphOptionContent, SWT.BORDER);
-		arrayMemText.setText("64");
-		arrayMemText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	}
 	
 	@Override
@@ -212,22 +170,6 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_CACHE_TYPE)) {
 			cacheTypeCombo.select(Arrays.asList(cacheTypeList).indexOf(properties.getProperty(NeoEMFModel.PROPERTY_NEO4J_CACHE_TYPE)));
 		}
-		useMemoryMapCheck.setSelection(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_USE_MEMORY_MAPPED_BUFFERS));
-		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_NODE_CACHE_SIZE)) {
-			nodeMemText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEO4J_NODE_CACHE_SIZE));
-		}
-		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_RELATIONSHIP_CACHE_SIZE)) {
-			relMemText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEO4J_RELATIONSHIP_CACHE_SIZE));
-		}
-		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_PROPERTY_CACHE_SIZE)) {
-			propMemText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEO4J_PROPERTY_CACHE_SIZE));
-		}
-		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_STRING_CACHE_SIZE)) {
-			stringMemText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEO4J_STRING_CACHE_SIZE));
-		}
-		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEO4J_ARRAY_CACHE_SIZE)) {
-			arrayMemText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEO4J_ARRAY_CACHE_SIZE));
-		}
 	}
 	
 	@Override
@@ -261,24 +203,6 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		if(graphRadio.getSelection()) {
 			// Store Graph options only if the accessed model is mapped to a graph
 			properties.put(NeoEMFModel.PROPERTY_NEO4J_CACHE_TYPE, cacheTypeCombo.getItem(cacheTypeCombo.getSelectionIndex()));
-			if(useMemoryMapCheck.getSelection()) {
-				properties.put(NeoEMFModel.PROPERTY_NEO4J_USE_MEMORY_MAPPED_BUFFERS, "1");
-			}
-			if(!nodeMemText.getText().isEmpty()) {
-				properties.put(NeoEMFModel.PROPERTY_NEO4J_NODE_CACHE_SIZE, nodeMemText.getText());
-			}
-			if(relMemText.getText().isEmpty()) {
-				properties.put(NeoEMFModel.PROPERTY_NEO4J_RELATIONSHIP_CACHE_SIZE, relMemText.getText());
-			}
-			if(propMemText.getText().isEmpty()) {
-				properties.put(NeoEMFModel.PROPERTY_NEO4J_PROPERTY_CACHE_SIZE, propMemText.getText());
-			}
-			if(stringMemText.getText().isEmpty()) {
-				properties.put(NeoEMFModel.PROPERTY_NEO4J_STRING_CACHE_SIZE, stringMemText.getText());
-			}
-			if(arrayMemText.getText().isEmpty()) {
-				properties.put(NeoEMFModel.PROPERTY_NEO4J_ARRAY_CACHE_SIZE, arrayMemText.getText());
-			}
 		}
 	}
 	
