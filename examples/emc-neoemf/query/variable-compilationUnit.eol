@@ -1,0 +1,3 @@
+SingleVariableAccess.all.collect(sva | sva.variable).collect(v | v.originalCompilationUnit)
+//	.select(ocu | not (ocu == null))
+	.collect(ocu | ocu.name).asSet().println();

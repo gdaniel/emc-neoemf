@@ -1,0 +1,1 @@
+ClassDeclaration.all.collect(c | c.superClass).println();
