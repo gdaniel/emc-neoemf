@@ -2,13 +2,11 @@ package org.eclipse.epsilon.emc.neoemf;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EPackage.Registry;
@@ -20,15 +18,21 @@ import org.eclipse.epsilon.eol.exceptions.models.EolModelElementTypeNotFoundExce
 import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
 import org.eclipse.epsilon.eol.models.IRelativePathResolver;
 
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.KeyIndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
+import com.tinkerpop.pipes.transform.InEdgesPipe;
+import com.tinkerpop.pipes.transform.OutVertexPipe;
+
 import fr.inria.atlanmod.neoemf.data.PersistenceBackendFactoryRegistry;
+import fr.inria.atlanmod.neoemf.data.blueprints.BlueprintsPersistenceBackend;
 import fr.inria.atlanmod.neoemf.data.blueprints.BlueprintsPersistenceBackendFactory;
 import fr.inria.atlanmod.neoemf.data.blueprints.neo4j.option.BlueprintsNeo4jOptionsBuilder;
 import fr.inria.atlanmod.neoemf.data.blueprints.neo4j.option.BlueprintsNeo4jResourceOptions;
 import fr.inria.atlanmod.neoemf.data.blueprints.util.BlueprintsURI;
 import fr.inria.atlanmod.neoemf.data.mapdb.option.MapDbOptionsBuilder;
 import fr.inria.atlanmod.neoemf.option.AbstractPersistenceOptionsBuilder;
-import fr.inria.atlanmod.neoemf.option.PersistentResourceOptions;
-import fr.inria.atlanmod.neoemf.option.PersistentStoreOptions;
 import fr.inria.atlanmod.neoemf.resource.DefaultPersistentResource;
 import fr.inria.atlanmod.neoemf.resource.PersistentResource;
 import fr.inria.atlanmod.neoemf.resource.PersistentResourceFactory;
@@ -37,6 +41,8 @@ public class NeoEMFModel extends AbstractEmfModel {
 
 	// Core properties
 	public static final String PROPERTY_NEOEMF_PATH = "neoemf.path";
+	public static final String PROPERTY_METAMODEL_URI = "metamodel.uri";
+	public static final String PROPERTY_GREMLIN = "native.gremlin";
 	public static final String PROPERTY_NEOEMF_RESOURCE_TYPE = "neoemf.resource.type";
 	public static final String PROPERTY_AUTOCOMMIT = "neoemf.autocommit";
 	public static final String PROPERTY_AUTOCOMMIT_CHUNK = "neoemf.autocommit.chunk";
@@ -49,16 +55,27 @@ public class NeoEMFModel extends AbstractEmfModel {
 	public static final String PROPERTY_NEO4J_CACHE_TYPE = "neoemf.blueprints.neo4j.cache.type";
 	
 	
-	private String neoemfPath, resourceType, cacheType;
-	private boolean autocommit, cacheSize, cacheIsSet, cacheEStructuralFeatures, logging;
+	private String neoemfPath, metamodelURI, resourceType, cacheType;
+	private boolean nativeGremlin, autocommit, cacheSize, cacheIsSet, cacheEStructuralFeatures, logging;
 	private int autocommitChunk;
+	
+	private BlueprintsPersistenceBackend blueprintsBackend;
+	
 	private ResourceSet rSet;
+	
+	private IdGraph<KeyIndexableGraph> graph;
+	
+	private Index<Vertex> metaclassIndex;
+	
+	private EPackage metamodel;
 	
 	@Override
 	public void load(StringProperties properties, IRelativePathResolver resolver) throws EolModelLoadingException {
 		super.load(properties, resolver);
 
 		this.neoemfPath = properties.getProperty(PROPERTY_NEOEMF_PATH);
+		this.metamodelURI = properties.getProperty(PROPERTY_METAMODEL_URI);
+		this.nativeGremlin = properties.hasProperty(PROPERTY_GREMLIN);
 		this.resourceType = properties.getProperty(PROPERTY_NEOEMF_RESOURCE_TYPE);
 		this.autocommit = properties.hasProperty(PROPERTY_AUTOCOMMIT);
 		if(this.autocommit) {
@@ -73,8 +90,21 @@ public class NeoEMFModel extends AbstractEmfModel {
 			if(properties.hasProperty(PROPERTY_NEO4J_CACHE_TYPE)) {
 				cacheType = properties.getProperty(PROPERTY_NEO4J_CACHE_TYPE);
 			}
-		}		
+		}	
+		loadMetamodel();
 		load();
+	}
+	
+	private void loadMetamodel() {
+		metamodel = getPackageRegistry().getEPackage(metamodelURI);
+	}
+	
+	public EPackage getMetamodel() {
+		return metamodel;
+	}
+	
+	public BlueprintsPersistenceBackend getBackend() {
+		return blueprintsBackend;
 	}
 	
 	@Override
@@ -138,6 +168,17 @@ public class NeoEMFModel extends AbstractEmfModel {
 		} catch(IOException e) {
 			throw new EolModelLoadingException(e, this);
 		}
+		
+		Field backendField;
+		try {
+			backendField = modelImpl.getClass().getDeclaredField("backend");
+			backendField.setAccessible(true);
+			blueprintsBackend = (BlueprintsPersistenceBackend) backendField.get(modelImpl);
+		} catch(NoSuchFieldException | SecurityException | IllegalAccessException e) {
+			throw new RuntimeException("Cannot retrieve the Blueprints backend, see attached exception", e);
+		}
+		graph = blueprintsBackend.getGraph();
+		metaclassIndex = graph.getIndex("metaclasses", Vertex.class);
 	}
 	
 	/*
@@ -174,21 +215,40 @@ public class NeoEMFModel extends AbstractEmfModel {
 	}
 	
 	@Override
+	public boolean owns(Object instance) {
+		if(instance instanceof GremlinPipelineListWrapper) {
+			return ((GremlinPipelineListWrapper)instance).getModel() == this;
+		}
+		return super.owns(instance);
+	}
+	
+	@Override
 	protected Collection<EObject> getAllOfTypeFromModel(String type) throws EolModelElementTypeNotFoundException {
 		System.out.println("Computing allOfType");
+		if(nativeGremlin) {
+			return getAllOfTypeFromModelGremlin(type);
+		} else {
+			return super.getAllOfTypeFromModel(type);
+		}
+	}
+	
+	private Collection<EObject> getAllOfTypeFromModelGremlin(String type) throws EolModelElementTypeNotFoundException {
 		if(modelImpl instanceof PersistentResource) {
-			return ((PersistentResource)modelImpl).getAllInstances(classForName(type,getPackageRegistry()), true);
+			System.out.println("Using Gremlin native connector to compute allOfType");
+			EClassifier typeClassifier = metamodel.getEClassifier(type);
+			Iterable<Vertex> metaclass = metaclassIndex.get("name", type);
+			GremlinPipelineListWrapper pipeline = GremlinPipelineListWrapper.pipelineOf(this, metaclass, typeClassifier);
+			pipeline.getPipeline().add(new InEdgesPipe("kyanosInstanceOf"));
+			pipeline.getPipeline().add(new OutVertexPipe());
+			return pipeline;
 		}
 		return super.getAllOfTypeFromModel(type);
 	}
 	
 	@Override
 	protected Collection<EObject> getAllOfKindFromModel(String kind) throws EolModelElementTypeNotFoundException {
-		System.out.println("Computing allOfKind");
-		if(modelImpl instanceof PersistentResource) {
-			return ((PersistentResource)modelImpl).getAllInstances(classForName(kind,getPackageRegistry()));
-		}
-		return super.getAllOfKindFromModel(kind);
+		System.out.println("AllOfKind not supported, computing AllOfType");
+		return getAllOfTypeFromModel(kind);
 	}
 	
 }

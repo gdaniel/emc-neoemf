@@ -29,6 +29,8 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 			};
 	
 	private Text pathText;
+	private Text metamodelURIText;
+	private Button gremlinCheck;
 	private Button autocommitCheck;
 	private Text autocommitChunkText;
 	private Button cacheSizeCheck;
@@ -79,6 +81,20 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		browseModelFile.setText("Browse Worskpace...");
 		browseModelFile.addListener(SWT.Selection, 
 			new BrowseWorkspaceForNeoEMFModelsListener(pathText, "NeoEMF models in the workspace", "Select a NeoEMF model"));
+		
+		final Label lblMetamodelURI = new Label(groupContent, SWT.NONE);
+		lblMetamodelURI.setText("Metamodel EPackage URI");
+		metamodelURIText = new Text(groupContent, SWT.BORDER);
+		GridData metamodelURIGrid = new GridData(GridData.FILL_HORIZONTAL);
+		metamodelURIGrid.horizontalSpan = 2;
+		metamodelURIText.setLayoutData(metamodelURIGrid);
+		
+		final Label useGremlin = new Label(groupContent, SWT.NONE);
+		useGremlin.setText("Native Gremlin");
+		gremlinCheck = new Button(groupContent, SWT.CHECK);
+		GridData gremlinCheckGrid = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		gremlinCheckGrid.horizontalSpan = 2;
+		gremlinCheck.setLayoutData(gremlinCheckGrid);
 		
 		final Label backendType = new Label(groupContent, SWT.NONE);
 		backendType.setText("Backend");
@@ -143,6 +159,8 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		if(properties == null) return;
 		
 		pathText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEOEMF_PATH));
+		metamodelURIText.setText(properties.getProperty(NeoEMFModel.PROPERTY_METAMODEL_URI));
+		gremlinCheck.setSelection(properties.hasProperty(NeoEMFModel.PROPERTY_GREMLIN));
 		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEOEMF_RESOURCE_TYPE)) {
 			String resourceType = properties.getProperty(NeoEMFModel.PROPERTY_NEOEMF_RESOURCE_TYPE);
 			if(resourceType.equals("Map")) {
@@ -177,6 +195,10 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		super.storeProperties();
 		
 		properties.put(NeoEMFModel.PROPERTY_NEOEMF_PATH, pathText.getText());
+		properties.put(NeoEMFModel.PROPERTY_METAMODEL_URI, metamodelURIText.getText());
+		if(gremlinCheck.getSelection()) {
+			properties.put(NeoEMFModel.PROPERTY_GREMLIN, "1");
+		}
 		if(mapRadio.getSelection()) {
 			properties.put(NeoEMFModel.PROPERTY_NEOEMF_RESOURCE_TYPE, "Map");
 		}
