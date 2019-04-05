@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EPackage.Registry;
@@ -67,7 +67,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 	
 	private Index<Vertex> metaclassIndex;
 	
-	private EPackage metamodel;
+//	private EPackage metamodel;
 	
 	@Override
 	public void load(StringProperties properties, IRelativePathResolver resolver) throws EolModelLoadingException {
@@ -91,17 +91,17 @@ public class NeoEMFModel extends AbstractEmfModel {
 				cacheType = properties.getProperty(PROPERTY_NEO4J_CACHE_TYPE);
 			}
 		}	
-		loadMetamodel();
+//		loadMetamodel();
 		load();
 	}
 	
-	private void loadMetamodel() {
-		metamodel = getPackageRegistry().getEPackage(metamodelURI);
-	}
+//	private void loadMetamodel() {
+//		metamodel = getPackageRegistry().getEPackage(metamodelURI);
+//	}
 	
-	public EPackage getMetamodel() {
-		return metamodel;
-	}
+//	public EPackage getMetamodel() {
+//		return metamodel;
+//	}
 	
 	public BlueprintsPersistenceBackend getBackend() {
 		return blueprintsBackend;
@@ -168,7 +168,10 @@ public class NeoEMFModel extends AbstractEmfModel {
 		} catch(IOException e) {
 			throw new EolModelLoadingException(e, this);
 		}
-		
+		initBackend();
+	}
+	
+	public void initBackend() {
 		Field backendField;
 		try {
 			backendField = modelImpl.getClass().getDeclaredField("backend");
@@ -179,6 +182,16 @@ public class NeoEMFModel extends AbstractEmfModel {
 		}
 		graph = blueprintsBackend.getGraph();
 		metaclassIndex = graph.getIndex("metaclasses", Vertex.class);
+	}
+	
+	// required to configure the model without loading the resource
+//	public void setMetamodelURI(String uri) {
+//		this.metamodelURI = uri;
+//	}
+	
+	// required to configure the model without loading the resource
+	public void setGremlinSupport(boolean gremlin) {
+		this.nativeGremlin = gremlin;
 	}
 	
 	/*
@@ -235,9 +248,10 @@ public class NeoEMFModel extends AbstractEmfModel {
 	private Collection<EObject> getAllOfTypeFromModelGremlin(String type) throws EolModelElementTypeNotFoundException {
 		if(modelImpl instanceof PersistentResource) {
 			System.out.println("Using Gremlin native connector to compute allOfType");
-			EClassifier typeClassifier = metamodel.getEClassifier(type);
+//			EClassifier typeClassifier = metamodel.getEClassifier(type);
+			EClass typeClass = classForName(type);
 			Iterable<Vertex> metaclass = metaclassIndex.get("name", type);
-			GremlinPipelineListWrapper pipeline = GremlinPipelineListWrapper.pipelineOf(this, metaclass, typeClassifier);
+			GremlinPipelineListWrapper pipeline = GremlinPipelineListWrapper.pipelineOf(this, metaclass, typeClass);
 			pipeline.getPipeline().add(new InEdgesPipe("kyanosInstanceOf"));
 			pipeline.getPipeline().add(new OutVertexPipe());
 			return pipeline;

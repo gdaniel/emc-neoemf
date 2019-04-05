@@ -29,7 +29,7 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 			};
 	
 	private Text pathText;
-	private Text metamodelURIText;
+//	private Text metamodelURIText;
 	private Button gremlinCheck;
 	private Button autocommitCheck;
 	private Text autocommitChunkText;
@@ -82,12 +82,12 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		browseModelFile.addListener(SWT.Selection, 
 			new BrowseWorkspaceForNeoEMFModelsListener(pathText, "NeoEMF models in the workspace", "Select a NeoEMF model"));
 		
-		final Label lblMetamodelURI = new Label(groupContent, SWT.NONE);
-		lblMetamodelURI.setText("Metamodel EPackage URI");
-		metamodelURIText = new Text(groupContent, SWT.BORDER);
-		GridData metamodelURIGrid = new GridData(GridData.FILL_HORIZONTAL);
-		metamodelURIGrid.horizontalSpan = 2;
-		metamodelURIText.setLayoutData(metamodelURIGrid);
+//		final Label lblMetamodelURI = new Label(groupContent, SWT.NONE);
+//		lblMetamodelURI.setText("Metamodel EPackage URI");
+//		metamodelURIText = new Text(groupContent, SWT.BORDER);
+//		GridData metamodelURIGrid = new GridData(GridData.FILL_HORIZONTAL);
+//		metamodelURIGrid.horizontalSpan = 2;
+//		metamodelURIText.setLayoutData(metamodelURIGrid);
 		
 		final Label useGremlin = new Label(groupContent, SWT.NONE);
 		useGremlin.setText("Native Gremlin");
@@ -159,7 +159,7 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		if(properties == null) return;
 		
 		pathText.setText(properties.getProperty(NeoEMFModel.PROPERTY_NEOEMF_PATH));
-		metamodelURIText.setText(properties.getProperty(NeoEMFModel.PROPERTY_METAMODEL_URI));
+//		metamodelURIText.setText(properties.getProperty(NeoEMFModel.PROPERTY_METAMODEL_URI));
 		gremlinCheck.setSelection(properties.hasProperty(NeoEMFModel.PROPERTY_GREMLIN));
 		if(properties.hasProperty(NeoEMFModel.PROPERTY_NEOEMF_RESOURCE_TYPE)) {
 			String resourceType = properties.getProperty(NeoEMFModel.PROPERTY_NEOEMF_RESOURCE_TYPE);
@@ -195,7 +195,7 @@ public class NeoEMFModelConfigurationDialog extends AbstractModelConfigurationDi
 		super.storeProperties();
 		
 		properties.put(NeoEMFModel.PROPERTY_NEOEMF_PATH, pathText.getText());
-		properties.put(NeoEMFModel.PROPERTY_METAMODEL_URI, metamodelURIText.getText());
+//		properties.put(NeoEMFModel.PROPERTY_METAMODEL_URI, metamodelURIText.getText());
 		if(gremlinCheck.getSelection()) {
 			properties.put(NeoEMFModel.PROPERTY_GREMLIN, "1");
 		}
