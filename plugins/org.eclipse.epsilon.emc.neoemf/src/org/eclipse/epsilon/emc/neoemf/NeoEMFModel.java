@@ -50,25 +50,25 @@ public class NeoEMFModel extends AbstractEmfModel {
 	public static final String PROPERTY_CACHE_ISSET = "neoemf.cache.isset";
 	public static final String PROPERTY_CACHE_ESTRUCTURALFEATURES = "neoemf.cache.estructuralfeatures";
 	public static final String PROPERTY_LOGGING = "neoemf.logging";
-	
+
 	// Neo4j properties
 	public static final String PROPERTY_NEO4J_CACHE_TYPE = "neoemf.blueprints.neo4j.cache.type";
-	
-	
+
+
 	private String neoemfPath, metamodelURI, resourceType, cacheType;
 	private boolean nativeGremlin, autocommit, cacheSize, cacheIsSet, cacheEStructuralFeatures, logging;
 	private int autocommitChunk;
-	
+
 	private BlueprintsPersistenceBackend blueprintsBackend;
-	
+
 	private ResourceSet rSet;
-	
+
 	private IdGraph<KeyIndexableGraph> graph;
-	
+
 	private Index<Vertex> metaclassIndex;
-	
+
 //	private EPackage metamodel;
-	
+
 	@Override
 	public void load(StringProperties properties, IRelativePathResolver resolver) throws EolModelLoadingException {
 		super.load(properties, resolver);
@@ -85,34 +85,34 @@ public class NeoEMFModel extends AbstractEmfModel {
 		this.cacheIsSet = properties.hasProperty(PROPERTY_CACHE_ISSET);
 		this.cacheEStructuralFeatures = properties.hasProperty(PROPERTY_CACHE_ESTRUCTURALFEATURES);
 		this.logging = properties.hasProperty(PROPERTY_LOGGING);
-		
+
 		if(this.resourceType.equals("Graph")) {
 			if(properties.hasProperty(PROPERTY_NEO4J_CACHE_TYPE)) {
 				cacheType = properties.getProperty(PROPERTY_NEO4J_CACHE_TYPE);
 			}
-		}	
+		}
 //		loadMetamodel();
 		load();
 	}
-	
+
 //	private void loadMetamodel() {
 //		metamodel = getPackageRegistry().getEPackage(metamodelURI);
 //	}
-	
+
 //	public EPackage getMetamodel() {
 //		return metamodel;
 //	}
-	
+
 	public BlueprintsPersistenceBackend getBackend() {
 		return blueprintsBackend;
 	}
-	
+
 	@Override
 	protected void loadModel() throws EolModelLoadingException {
 		// Each model is loaded in a dedicated ResourceSet
 		// TODO see if we can use a CachedResourceSet
 		rSet = new ResourceSetImpl();
-		
+
 		AbstractPersistenceOptionsBuilder builder = null;
 		if(resourceType.equals("Graph")) {
 			builder = BlueprintsNeo4jOptionsBuilder.newBuilder();
@@ -120,7 +120,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 		else if(resourceType.equals("Map")) {
 			builder = MapDbOptionsBuilder.newBuilder();
 		}
-		
+
 		// set core-level options
 		if(cacheSize)
 			builder.cacheSizes();
@@ -137,7 +137,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 			}
 			rSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put(BlueprintsURI.SCHEME, PersistentResourceFactory.getInstance());
 			this.modelImpl = rSet.createResource(BlueprintsURI.createFileURI(new File(neoemfPath)));
-			
+
 			// set graph-specific options
 			if(autocommit) {
 				if(autocommitChunk > 0) {
@@ -170,7 +170,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 		}
 		initBackend();
 	}
-	
+
 	public void initBackend() {
 		Field backendField;
 		try {
@@ -183,31 +183,30 @@ public class NeoEMFModel extends AbstractEmfModel {
 		graph = blueprintsBackend.getGraph();
 		metaclassIndex = graph.getIndex("metaclasses", Vertex.class);
 	}
-	
+
 	// required to configure the model without loading the resource
 //	public void setMetamodelURI(String uri) {
 //		this.metamodelURI = uri;
 //	}
-	
+
 	// required to configure the model without loading the resource
 	public void setGremlinSupport(boolean gremlin) {
 		this.nativeGremlin = gremlin;
 	}
-	
-	/*
-	 *  For now the EPackages are retrieved in the global 
-	 *  registry, and have to be registered somehow before
-	 *  accessing the model.
-	 */
+
 	@Override
 	protected Registry getPackageRegistry() {
-		return EPackage.Registry.INSTANCE;
+	  // Use the local registry if it exists, fallback on global if not
+	  Registry r = modelImpl.getResourceSet().getPackageRegistry();
+	  if (r == null)
+	    r = EPackage.Registry.INSTANCE;
+	  return r;
 	}
-	
+
 	@Override
 	public boolean store() {
 		if (modelImpl == null) return false;
-		
+
 		try {
 			modelImpl.save(Collections.emptyMap());
 			return true;
@@ -216,17 +215,17 @@ public class NeoEMFModel extends AbstractEmfModel {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public void disposeModel() {
 		((DefaultPersistentResource)getNeoEMFResource()).close();
 		super.disposeModel();
 	}
-	
+
 	protected PersistentResource getNeoEMFResource() {
 		return (PersistentResource)modelImpl;
 	}
-	
+
 	@Override
 	public boolean owns(Object instance) {
 		if(instance instanceof GremlinPipelineListWrapper) {
@@ -234,7 +233,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 		}
 		return super.owns(instance);
 	}
-	
+
 	@Override
 	protected Collection<EObject> getAllOfTypeFromModel(String type) throws EolModelElementTypeNotFoundException {
 		System.out.println("Computing allOfType");
@@ -244,7 +243,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 			return super.getAllOfTypeFromModel(type);
 		}
 	}
-	
+
 	private Collection<EObject> getAllOfTypeFromModelGremlin(String type) throws EolModelElementTypeNotFoundException {
 		if(modelImpl instanceof PersistentResource) {
 			System.out.println("Using Gremlin native connector to compute allOfType");
@@ -258,11 +257,11 @@ public class NeoEMFModel extends AbstractEmfModel {
 		}
 		return super.getAllOfTypeFromModel(type);
 	}
-	
+
 	@Override
 	protected Collection<EObject> getAllOfKindFromModel(String kind) throws EolModelElementTypeNotFoundException {
 		System.out.println("AllOfKind not supported, computing AllOfType");
 		return getAllOfTypeFromModel(kind);
 	}
-	
+
 }
