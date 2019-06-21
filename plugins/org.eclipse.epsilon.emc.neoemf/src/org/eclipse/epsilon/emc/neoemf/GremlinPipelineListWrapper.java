@@ -18,6 +18,7 @@ import org.eclipse.epsilon.eol.execute.operations.declarative.IAbstractOperation
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.gremlin.java.GremlinStartPipe;
+import fr.inria.atlanmod.neoemf.util.logging.NeoLogger;
 
 /**
  * A {@link GremlinPipeline} wrapper that allows to manipulate the pipeline contents as an {@link ImmutableList}.
@@ -55,7 +56,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 	 * <p>
 	 * The pipeline is initialized with an set of vertices (i.e. the starting point of the traversal), and an
 	 * {@link EClassifier} representing the EMF-related type of the provided vertices.
-	 * 
+	 *
 	 * @param model                 the {@link NeoEMFModel} to traverse
 	 * @param vertices              the starting point of the traversal
 	 * @param pipelineEndClassifier the {@link EClassifier} representing the EMF-related type of the provided vertices
@@ -73,7 +74,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 	 * <p>
 	 * The pipeline is initialized with a {@link GremlinPipeline} holding the traversal logic, and an
 	 * {@link EClassifier} representing the EMF-related type of the pipeline's output.
-	 * 
+	 *
 	 * @param model                 the {@link NeoEMFModel} to traverse
 	 * @param pipeline              the {@link GremlinPipeline} holding the traversal logic
 	 * @param pipelineEndClassifier the {@link EClassifier} representing the EMF-related type of the pipeline's output.
@@ -89,7 +90,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 	 * Returns the internal {@link GremlinPipeline}.
 	 * <p>
 	 * This method is used to add computation steps to an existing {@link GremlinPipeline}.
-	 * 
+	 *
 	 * @return the internal {@link GremlinPipeline}
 	 */
 	public GremlinPipeline<Vertex, Object> getPipeline() {
@@ -98,7 +99,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 
 	/**
 	 * Returns the {@link NeoEMFModel} traversed by this pipeline.
-	 * 
+	 *
 	 * @return the {@link NeoEMFModel} traversed by this pipeline
 	 */
 	public NeoEMFModel getModel() {
@@ -107,7 +108,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 
 	/**
 	 * Returns the {@link EClassifier} representing the EMF-related type of the pipeline's output.
-	 * 
+	 *
 	 * @return the {@link EClassifier} representing the EMF-related type of the pipeline's output
 	 */
 	public EClassifier getPipelineEndEClassifier() {
@@ -119,7 +120,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 	 * <p>
 	 * This method is used when a new computation steps are added to an existing {@link GremlinPipeline} (see
 	 * {@link #getPipeline()}), and when those steps change the pipeline's output type.
-	 * 
+	 *
 	 * @param newEClassifier the {@link EClassifier} to set
 	 */
 	public void setPipelineEndEClassifier(EClassifier newEClassifier) {
@@ -150,7 +151,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 	 * {@link EObject}.
 	 */
 	private void fetchPipeline() {
-		this.fetchedPipeline = new ArrayList<Object>();
+		this.fetchedPipeline = new ArrayList<>();
 		for (Object o : this.pipeline) {
 			if (o instanceof Vertex) {
 				fetchedPipeline.add(model.getBackend().reifyVertex((Vertex) o));
@@ -196,7 +197,7 @@ public class GremlinPipelineListWrapper extends ImmutableList implements IAbstra
 
 	@Override
 	public Iterator iterator() {
-		System.out.println("Getting an iterator on the Gremlin Pipeline (iterating a full pipeline can be costly)");
+		NeoLogger.info("Getting an iterator on the Gremlin Pipeline (iterating a full pipeline can be costly)");
 		if (isNull(fetchedPipeline)) {
 			fetchPipeline();
 		}

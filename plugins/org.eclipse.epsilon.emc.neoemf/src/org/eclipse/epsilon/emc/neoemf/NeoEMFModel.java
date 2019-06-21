@@ -36,6 +36,7 @@ import fr.inria.atlanmod.neoemf.option.AbstractPersistenceOptionsBuilder;
 import fr.inria.atlanmod.neoemf.resource.DefaultPersistentResource;
 import fr.inria.atlanmod.neoemf.resource.PersistentResource;
 import fr.inria.atlanmod.neoemf.resource.PersistentResourceFactory;
+import fr.inria.atlanmod.neoemf.util.logging.NeoLogger;
 
 public class NeoEMFModel extends AbstractEmfModel {
 
@@ -236,7 +237,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 
 	@Override
 	protected Collection<EObject> getAllOfTypeFromModel(String type) throws EolModelElementTypeNotFoundException {
-		System.out.println("Computing allOfType");
+		NeoLogger.info("Computing allOfType");
 		if(nativeGremlin) {
 			return getAllOfTypeFromModelGremlin(type);
 		} else {
@@ -246,7 +247,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 
 	private Collection<EObject> getAllOfTypeFromModelGremlin(String type) throws EolModelElementTypeNotFoundException {
 		if(modelImpl instanceof PersistentResource) {
-			System.out.println("Using Gremlin native connector to compute allOfType");
+			NeoLogger.info("Using Gremlin native connector to compute allOfType");
 //			EClassifier typeClassifier = metamodel.getEClassifier(type);
 			EClass typeClass = classForName(type);
 			Iterable<Vertex> metaclass = metaclassIndex.get("name", type);
@@ -260,7 +261,7 @@ public class NeoEMFModel extends AbstractEmfModel {
 
 	@Override
 	protected Collection<EObject> getAllOfKindFromModel(String kind) throws EolModelElementTypeNotFoundException {
-		System.out.println("AllOfKind not supported, computing AllOfType");
+		NeoLogger.info("AllOfKind not supported, computing AllOfType");
 		return getAllOfTypeFromModel(kind);
 	}
 
