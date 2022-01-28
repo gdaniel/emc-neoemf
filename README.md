@@ -1,3 +1,5 @@
+> ❗ This repository is archived. It won't be maintained in the foreseeable future
+
 # EMC Driver for NeoEMF Models
 The plugins in this repository extend the [Eclipse Epsilon](http://www.eclipse.org/epsilon/) model management framework to allow it to read and write EMF models stored in a [NeoEMF](http://www.neoemf.com/) instance.
 
